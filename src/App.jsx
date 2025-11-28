@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ScheduleTable from './components/ScheduleTable';
 import BookingModal from './components/BookingModal';
 import DateTabs from './components/DateTabs';
