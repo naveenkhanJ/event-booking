@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const BookingModal = ({ isOpen, onClose, onSave, initialData }) => {
+const BookingModal = ({ isOpen, onClose, onSave, onDelete, initialData }) => {
   const [name, setName] = useState('');
   const [mobile, setMobile] = useState('');
 
@@ -23,6 +23,12 @@ const BookingModal = ({ isOpen, onClose, onSave, initialData }) => {
       return;
     }
     onSave({ name, mobile });
+  };
+
+  const handleDelete = () => {
+    if (window.confirm('Are you sure you want to cancel this booking?')) {
+      onDelete();
+    }
   };
 
   return (
@@ -52,6 +58,16 @@ const BookingModal = ({ isOpen, onClose, onSave, initialData }) => {
             />
           </div>
           <div className="modal-actions">
+            {initialData && (
+              <button
+                type="button"
+                className="btn"
+                style={{ backgroundColor: '#ff4444', color: 'white', marginRight: 'auto' }}
+                onClick={handleDelete}
+              >
+                Cancel Booking
+              </button>
+            )}
             <button type="button" className="btn btn-secondary" onClick={onClose}>
               Cancel
             </button>

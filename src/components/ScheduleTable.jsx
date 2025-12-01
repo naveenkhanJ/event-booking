@@ -10,6 +10,7 @@ const SLOTS = [
     { id: 7, time: '3.45pm - 4.45pm' },
     { id: 8, time: '5.15pm - 6.15pm' },
     { id: 9, time: '6pm - 7pm' },
+    { id: 10, time: '6.45pm - 7.45pm' },
 ];
 
 const ROWS = Array.from({ length: 10 }, (_, i) => i + 1);

@@ -6,7 +6,7 @@ import DateTabs from './components/DateTabs';
 import FileUpload from './components/FileUpload';
 import { parseExcelFile, transformExcelData } from './utils/excelParser';
 import { db } from './firebase';
-import { collection, onSnapshot, doc, setDoc, writeBatch } from 'firebase/firestore';
+import { collection, onSnapshot, doc, setDoc, deleteDoc, writeBatch } from 'firebase/firestore';
 
 const DATES = [
   '01st December',
@@ -55,6 +55,20 @@ function App() {
       } catch (error) {
         console.error("Error saving document: ", error);
         alert("Failed to save booking. Please try again.");
+      }
+    }
+    setIsModalOpen(false);
+    setCurrentSlot(null);
+  };
+
+  const handleDeleteBooking = async () => {
+    if (currentSlot) {
+      const key = `${selectedDate}-${currentSlot.slotId}-${currentSlot.rowId}`;
+      try {
+        await deleteDoc(doc(db, 'bookings', key));
+      } catch (error) {
+        console.error("Error deleting document: ", error);
+        alert("Failed to delete booking. Please try again.");
       }
     }
     setIsModalOpen(false);
@@ -129,6 +143,7 @@ function App() {
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         onSave={handleSaveBooking}
+        onDelete={handleDeleteBooking}
         initialData={getInitialModalData()}
       />
       <AdminLogin
