@@ -33,6 +33,8 @@ function App() {
         newBookings[doc.id] = doc.data();
       });
       setBookings(newBookings);
+      console.log('Loaded bookings from Firestore:', Object.keys(newBookings).length);
+      console.log('Sample booking keys:', Object.keys(newBookings).slice(0, 5));
     });
 
     return () => unsubscribe();

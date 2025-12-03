@@ -64,6 +64,7 @@ export const transformExcelData = (data) => {
 
         // 2. Parse Slot Numbers (Rows)
         const rowIds = String(slotNumbersStr).split(',').map(s => parseInt(s.trim(), 10));
+        console.log(`Parsed rowIds for ${name}:`, rowIds);
 
         // 3. Map Time Slot to Column ID
         const slotId = findSlotIdByTime(timeSlotStr);

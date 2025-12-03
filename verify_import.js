@@ -29,3 +29,17 @@ if (bookings[expectedKey2] && bookings[expectedKey2].name === 'Dr Padma Gunaratn
 } else {
     console.error('FAILURE: Dr Padma Gunaratne not found or in wrong slot.');
 }
+
+const expectedKey11 = '04th December-2-11';
+if (bookings[expectedKey11] && bookings[expectedKey11].name === 'Test User 11') {
+    console.log('SUCCESS: Found Test User 11 in slot 11.');
+} else {
+    console.error('FAILURE: Test User 11 not found in slot 11.');
+}
+
+const expectedKey12 = '04th December-2-12';
+if (bookings[expectedKey12] && bookings[expectedKey12].name === 'Test User 12') {
+    console.log('SUCCESS: Found Test User 12 in slot 12.');
+} else {
+    console.error('FAILURE: Test User 12 not found in slot 12.');
+}
