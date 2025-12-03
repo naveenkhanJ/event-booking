@@ -33,9 +33,9 @@ export const transformExcelData = (data) => {
         const mobile = row['Phone'];
         const dateStr = row['Date']; // e.g., "2025-12-04" or Date object
         const timeSlotStr = row['Time Slot']; // e.g., "10:45 am - 11:45 am"
-        const slotNumbersStr = row['Slot Number(s)']; // e.g., 3 or "5, 6"
+        // const slotNumbersStr = row['Slot Number(s)']; // Moved down for fallback handling
 
-        if (!name || !dateStr || !slotNumbersStr) return;
+        if (!name || !dateStr) return;
 
         // 1. Format Date
         let dateObj;
@@ -63,8 +63,22 @@ export const transformExcelData = (data) => {
         const formattedDate = `${day.toString().padStart(2, '0')}${suffix(day)} December`;
 
         // 2. Parse Slot Numbers (Rows)
-        const rowIds = String(slotNumbersStr).split(',').map(s => parseInt(s.trim(), 10));
-        console.log(`Parsed rowIds for ${name}:`, rowIds);
+        // Try different column names
+        const slotNumbersRaw = row['Slot Number(s)'] || row['Slot No'] || row['Slot Number'] || row['Slot Numbers'];
+
+        if (!slotNumbersRaw) {
+            console.warn(`No slot number found for ${name}`);
+            return;
+        }
+
+        // Split by comma, slash, ampersand, plus, or hyphen (if surrounded by spaces to avoid negative numbers, though unlikely here)
+        // We'll just split by non-digit characters except for maybe simple connecting punctuation
+        const rowIds = String(slotNumbersRaw)
+            .split(/[,/&+\-]|\s+and\s+/i) // Split by common separators
+            .map(s => parseInt(s.trim(), 10))
+            .filter(n => !isNaN(n)); // Filter out invalid numbers
+
+        console.log(`Parsed rowIds for ${name} (raw: "${slotNumbersRaw}"):`, rowIds);
 
         // 3. Map Time Slot to Column ID
         const slotId = findSlotIdByTime(timeSlotStr);

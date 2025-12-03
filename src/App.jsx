@@ -131,6 +131,16 @@ function App() {
           </button>
         </div>
       </div>
+
+      {isAdmin && (
+        <div style={{ padding: '10px', background: '#f0f0f0', marginBottom: '10px', fontSize: '12px' }}>
+          <strong>Debug Info:</strong><br />
+          Total Bookings: {Object.keys(bookings).length}<br />
+          Row 11 Bookings: {Object.keys(bookings).filter(k => k.endsWith('-11')).length}<br />
+          Row 12 Bookings: {Object.keys(bookings).filter(k => k.endsWith('-12')).length}
+        </div>
+      )}
+
       <DateTabs
         dates={DATES}
         selectedDate={selectedDate}
