@@ -97,16 +97,16 @@ export const transformExcelData = (data) => {
 };
 
 const SLOTS = [
-    { id: 1, time: '10am - 11am' },
-    { id: 2, time: '10.45am - 11.45am' },
-    { id: 3, time: '11.30am - 12.30pm' },
-    { id: 4, time: '1.30pm - 2.30pm' },
-    { id: 5, time: '2.15pm - 3.15pm' },
-    { id: 6, time: '3pm - 4pm' },
-    { id: 7, time: '3.45pm - 4.45pm' },
-    { id: 8, time: '5.15pm - 6.15pm' },
-    { id: 9, time: '6pm - 7pm' },
-    { id: 10, time: '6.45pm - 7.45pm' },
+    { id: 1, time: '10:00 am - 11:00 am' },
+    { id: 2, time: '10:45 am - 11:45 am' },
+    { id: 3, time: '11:30 am - 12:30 pm' },
+    { id: 4, time: '1:30 pm - 2:30 pm' },
+    { id: 5, time: '2:15 pm - 3:15 pm' },
+    { id: 6, time: '3:00 pm - 4:00 pm' },
+    { id: 7, time: '3:45 pm - 4:45 pm' },
+    { id: 8, time: '5:15 pm - 6:15 pm' },
+    { id: 9, time: '6:00 pm - 7:00 pm' },
+    { id: 10, time: '6:45 pm - 7:45 pm' },
 ];
 
 const findSlotIdByTime = (timeStr) => {
