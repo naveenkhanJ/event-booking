@@ -13,7 +13,7 @@ const SLOTS = [
     { id: 10, time: '6:45 pm - 7:45 pm' },
 ];
 
-const ROWS = Array.from({ length: 12 }, (_, i) => i + 1);
+const ROWS = Array.from({ length: 15 }, (_, i) => i + 1);
 
 const ScheduleTable = ({ bookings, onSlotClick, selectedDate }) => {
     const getBooking = (rowId, slotId) => {

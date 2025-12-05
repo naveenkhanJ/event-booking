@@ -178,7 +178,10 @@ function App() {
           <strong>Debug Info:</strong><br />
           Total Bookings: {Object.keys(bookings).length}<br />
           Row 11 Bookings: {Object.keys(bookings).filter(k => k.endsWith('-11')).length}<br />
-          Row 12 Bookings: {Object.keys(bookings).filter(k => k.endsWith('-12')).length}
+          Row 12 Bookings: {Object.keys(bookings).filter(k => k.endsWith('-12')).length}<br />
+          Row 13 Bookings: {Object.keys(bookings).filter(k => k.endsWith('-13')).length}<br />
+          Row 14 Bookings: {Object.keys(bookings).filter(k => k.endsWith('-14')).length}<br />
+          Row 15 Bookings: {Object.keys(bookings).filter(k => k.endsWith('-15')).length}
         </div>
       )}
 
