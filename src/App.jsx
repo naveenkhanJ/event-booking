@@ -8,18 +8,10 @@ import { parseExcelFile, transformExcelData } from './utils/excelParser';
 import { db } from './firebase';
 import { collection, onSnapshot, doc, setDoc, deleteDoc, writeBatch } from 'firebase/firestore';
 
-const DATES = [
-  '01st December',
-  '02nd December',
-  '03rd December',
-  '04th December',
-  '05th December',
-  '06th December',
-  '07th December',
-];
 
 function App() {
-  const [selectedDate, setSelectedDate] = useState(DATES[0]);
+  const [selectedDate, setSelectedDate] = useState('');
+  const [availableDates, setAvailableDates] = useState([]);
   const [bookings, setBookings] = useState({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAdminLoginOpen, setIsAdminLoginOpen] = useState(false);
@@ -29,12 +21,50 @@ function App() {
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'bookings'), (snapshot) => {
       const newBookings = {};
+      const datesSet = new Set();
+
       snapshot.forEach((doc) => {
-        newBookings[doc.id] = doc.data();
+        const data = doc.data();
+        newBookings[doc.id] = data;
+        // Key format: "01st December-1-1"
+        const datePart = doc.id.split('-')[0];
+        datesSet.add(datePart);
       });
+
       setBookings(newBookings);
+
+      // Sort dates chronologically
+      const months = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+      ];
+
+      const sortedDates = Array.from(datesSet).sort((a, b) => {
+        const parseDate = (str) => {
+          // str e.g. "01st December"
+          const [dayStr, monthStr] = str.split(' ');
+          const day = parseInt(dayStr, 10);
+          const monthIndex = months.indexOf(monthStr);
+          return { day, monthIndex };
+        };
+
+        const dA = parseDate(a);
+        const dB = parseDate(b);
+
+        if (dA.monthIndex !== dB.monthIndex) {
+          return dA.monthIndex - dB.monthIndex;
+        }
+        return dA.day - dB.day;
+      });
+
+      setAvailableDates(sortedDates);
+
+      // Select first date if none selected or current selection is invalid
+      if (sortedDates.length > 0) {
+        setSelectedDate(prev => sortedDates.includes(prev) ? prev : sortedDates[0]);
+      }
+
       console.log('Loaded bookings from Firestore:', Object.keys(newBookings).length);
-      console.log('Sample booking keys:', Object.keys(newBookings).slice(0, 5));
     });
 
     return () => unsubscribe();
@@ -86,26 +116,7 @@ function App() {
     try {
       const jsonData = await parseExcelFile(file);
       const newBookings = transformExcelData(jsonData);
-
-      // Validation: Check if dates match available dates
-      const availableDates = new Set(DATES);
-      const invalidDates = new Set();
-      const validBookings = {};
-
-      Object.entries(newBookings).forEach(([key, data]) => {
-        // key format: "01st December-1-1"
-        const datePart = key.split('-')[0];
-        if (availableDates.has(datePart)) {
-          validBookings[key] = data;
-        } else {
-          invalidDates.add(datePart);
-        }
-      });
-
-      if (invalidDates.size > 0) {
-        const ignoredDates = Array.from(invalidDates).join(', ');
-        alert(`Warning: Some bookings were ignored because their dates are not in the current schedule: ${ignoredDates}\n\nOnly bookings for ${DATES[0]} to ${DATES[DATES.length - 1]} are allowed.`);
-      }
+      const validBookings = newBookings; // All parsed bookings are considered valid now
 
       if (Object.keys(validBookings).length === 0) {
         // Create a debug report
@@ -113,7 +124,7 @@ function App() {
           `${key}: ${val.name} (${val.mobile})`
         ).join('\n');
 
-        alert(`No valid bookings found for the current schedule.\n\nDebug Info (First 5 parsed items):\n${debugReport || 'No items parsed'}\n\nExpected Date Format: DD-MM-YYYY (e.g., 01-12-2025)`);
+        alert(`No valid bookings found.\n\nDebug Info (First 5 parsed items):\n${debugReport || 'No items parsed'}\n\nExpected Date Format: DD-MM-YYYY (e.g., 01-12-2025)`);
         return;
       }
 
@@ -172,7 +183,7 @@ function App() {
       )}
 
       <DateTabs
-        dates={DATES}
+        dates={availableDates}
         selectedDate={selectedDate}
         onSelectDate={setSelectedDate}
       />
