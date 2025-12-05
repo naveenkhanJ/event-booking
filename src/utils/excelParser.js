@@ -42,17 +42,24 @@ export const transformExcelData = (data) => {
         if (dateStr instanceof Date) {
             dateObj = dateStr;
         } else {
-            // Handle DD/MM/YYYY or MM/DD/YYYY or YYYY-MM-DD
-            // If it's a string, try to parse it.
-            // Note: new Date("01-12-2025") might be treated as Jan 12th or Dec 1st depending on locale/browser.
-            // We will try to be smart or assume ISO if possible, but for "DD-MM-YYYY" we might need manual parsing if standard fails or is ambiguous.
+            // Handle DD/MM/YYYY, MM/DD/YYYY, YYYY-MM-DD, DD.MM.YYYY, DD-MM-YY
+            const dateString = String(dateStr).trim();
 
-            // Simple check for DD-MM-YYYY or DD/MM/YYYY
-            const ddmmyyyy = String(dateStr).match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$/);
+            // 1. Try DD-MM-YYYY or DD/MM/YYYY or DD.MM.YYYY (4 digit year)
+            const ddmmyyyy = dateString.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})$/);
+
+            // 2. Try DD-MM-YY or DD/MM/YY or DD.MM.YY (2 digit year)
+            const ddmmyy = dateString.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{2})$/);
+
             if (ddmmyyyy) {
                 // Assume DD-MM-YYYY
                 dateObj = new Date(ddmmyyyy[3], ddmmyyyy[2] - 1, ddmmyyyy[1]);
+            } else if (ddmmyy) {
+                // Assume DD-MM-YY, assume 20xx
+                const year = 2000 + parseInt(ddmmyy[3], 10);
+                dateObj = new Date(year, ddmmyy[2] - 1, ddmmyy[1]);
             } else {
+                // Fallback to default parser
                 dateObj = new Date(dateStr);
             }
         }

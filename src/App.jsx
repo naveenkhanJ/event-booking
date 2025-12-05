@@ -108,7 +108,12 @@ function App() {
       }
 
       if (Object.keys(validBookings).length === 0) {
-        alert('No valid bookings found for the current schedule.');
+        // Create a debug report
+        const debugReport = Object.entries(newBookings).slice(0, 5).map(([key, val]) =>
+          `${key}: ${val.name} (${val.mobile})`
+        ).join('\n');
+
+        alert(`No valid bookings found for the current schedule.\n\nDebug Info (First 5 parsed items):\n${debugReport || 'No items parsed'}\n\nExpected Date Format: DD-MM-YYYY (e.g., 01-12-2025)`);
         return;
       }
 
@@ -123,7 +128,7 @@ function App() {
       alert(`Successfully imported ${Object.keys(validBookings).length} bookings!`);
     } catch (error) {
       console.error('Error parsing Excel file:', error);
-      alert('Failed to parse Excel file.');
+      alert(`Failed to parse Excel file. Error: ${error.message}`);
     }
   };
 
