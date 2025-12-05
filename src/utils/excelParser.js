@@ -42,7 +42,19 @@ export const transformExcelData = (data) => {
         if (dateStr instanceof Date) {
             dateObj = dateStr;
         } else {
-            dateObj = new Date(dateStr);
+            // Handle DD/MM/YYYY or MM/DD/YYYY or YYYY-MM-DD
+            // If it's a string, try to parse it.
+            // Note: new Date("01-12-2025") might be treated as Jan 12th or Dec 1st depending on locale/browser.
+            // We will try to be smart or assume ISO if possible, but for "DD-MM-YYYY" we might need manual parsing if standard fails or is ambiguous.
+
+            // Simple check for DD-MM-YYYY or DD/MM/YYYY
+            const ddmmyyyy = String(dateStr).match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$/);
+            if (ddmmyyyy) {
+                // Assume DD-MM-YYYY
+                dateObj = new Date(ddmmyyyy[3], ddmmyyyy[2] - 1, ddmmyyyy[1]);
+            } else {
+                dateObj = new Date(dateStr);
+            }
         }
 
         if (isNaN(dateObj.getTime())) {
@@ -51,6 +63,13 @@ export const transformExcelData = (data) => {
         }
 
         const day = dateObj.getDate();
+        const monthIndex = dateObj.getMonth();
+        const months = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+        const monthName = months[monthIndex];
+
         const suffix = (day) => {
             if (day > 3 && day < 21) return 'th';
             switch (day % 10) {
@@ -60,7 +79,7 @@ export const transformExcelData = (data) => {
                 default: return 'th';
             }
         };
-        const formattedDate = `${day.toString().padStart(2, '0')}${suffix(day)} December`;
+        const formattedDate = `${day.toString().padStart(2, '0')}${suffix(day)} ${monthName}`;
 
         // 2. Parse Slot Numbers (Rows)
         // Try different column names
@@ -83,11 +102,16 @@ export const transformExcelData = (data) => {
         // 3. Map Time Slot to Column ID
         const slotId = findSlotIdByTime(timeSlotStr);
 
+        if (!slotId) {
+            console.warn(`No slot ID found for time "${timeSlotStr}" for ${name}`);
+        }
+
         if (slotId) {
             rowIds.forEach(rowId => {
                 if (!isNaN(rowId)) {
                     const key = `${formattedDate}-${slotId}-${rowId}`;
                     bookings[key] = { name, mobile };
+                    console.log(`Created booking key: ${key} for ${name}`);
                 }
             });
         }

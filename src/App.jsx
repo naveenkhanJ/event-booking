@@ -87,15 +87,40 @@ function App() {
       const jsonData = await parseExcelFile(file);
       const newBookings = transformExcelData(jsonData);
 
+      // Validation: Check if dates match available dates
+      const availableDates = new Set(DATES);
+      const invalidDates = new Set();
+      const validBookings = {};
+
+      Object.entries(newBookings).forEach(([key, data]) => {
+        // key format: "01st December-1-1"
+        const datePart = key.split('-')[0];
+        if (availableDates.has(datePart)) {
+          validBookings[key] = data;
+        } else {
+          invalidDates.add(datePart);
+        }
+      });
+
+      if (invalidDates.size > 0) {
+        const ignoredDates = Array.from(invalidDates).join(', ');
+        alert(`Warning: Some bookings were ignored because their dates are not in the current schedule: ${ignoredDates}\n\nOnly bookings for ${DATES[0]} to ${DATES[DATES.length - 1]} are allowed.`);
+      }
+
+      if (Object.keys(validBookings).length === 0) {
+        alert('No valid bookings found for the current schedule.');
+        return;
+      }
+
       // Batch write to Firestore
       const batch = writeBatch(db);
-      Object.entries(newBookings).forEach(([key, data]) => {
+      Object.entries(validBookings).forEach(([key, data]) => {
         const docRef = doc(db, 'bookings', key);
         batch.set(docRef, data);
       });
 
       await batch.commit();
-      alert('Bookings imported successfully!');
+      alert(`Successfully imported ${Object.keys(validBookings).length} bookings!`);
     } catch (error) {
       console.error('Error parsing Excel file:', error);
       alert('Failed to parse Excel file.');
