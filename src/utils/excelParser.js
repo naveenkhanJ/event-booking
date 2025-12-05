@@ -11,8 +11,8 @@ export const parseExcelFile = (file) => {
                 const workbook = XLSX.read(data, { type: 'array', cellDates: true });
                 const firstSheetName = workbook.SheetNames[0];
                 const worksheet = workbook.Sheets[firstSheetName];
-                // Use raw: false to get formatted strings for other cells, but dateNF ensures dates are handled
-                const jsonData = XLSX.utils.sheet_to_json(worksheet, { raw: false, dateNF: 'yyyy-mm-dd' });
+                // Use raw: true to get actual numbers (fixes scientific notation issues) and Date objects (from cellDates: true)
+                const jsonData = XLSX.utils.sheet_to_json(worksheet, { raw: true });
                 resolve(jsonData);
             } catch (error) {
                 reject(error);
@@ -30,7 +30,7 @@ export const transformExcelData = (data) => {
     data.forEach((row) => {
         // Expected columns: Name, Phone, Date, Time Slot, Slot Number(s)
         const name = row['Name'];
-        const mobile = row['Phone'];
+        const mobile = row['Phone'] ? String(row['Phone']) : '';
         const dateStr = row['Date']; // e.g., "2025-12-04" or Date object
         const timeSlotStr = row['Time Slot']; // e.g., "10:45 am - 11:45 am"
         // const slotNumbersStr = row['Slot Number(s)']; // Moved down for fallback handling
