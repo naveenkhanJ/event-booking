@@ -45,19 +45,32 @@ export const transformExcelData = (data) => {
             // Handle DD/MM/YYYY, MM/DD/YYYY, YYYY-MM-DD, DD.MM.YYYY, DD-MM-YY
             const dateString = String(dateStr).trim();
 
-            // 1. Try DD-MM-YYYY or DD/MM/YYYY or DD.MM.YYYY (4 digit year)
-            const ddmmyyyy = dateString.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})$/);
+            // Regex for parts: (p1)-(p2)-(p3)
+            const parts = dateString.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{2,4})$/);
 
-            // 2. Try DD-MM-YY or DD/MM/YY or DD.MM.YY (2 digit year)
-            const ddmmyy = dateString.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{2})$/);
+            if (parts) {
+                const p1 = parseInt(parts[1], 10);
+                const p2 = parseInt(parts[2], 10);
+                let p3 = parseInt(parts[3], 10);
 
-            if (ddmmyyyy) {
-                // Assume DD-MM-YYYY
-                dateObj = new Date(ddmmyyyy[3], ddmmyyyy[2] - 1, ddmmyyyy[1]);
-            } else if (ddmmyy) {
-                // Assume DD-MM-YY, assume 20xx
-                const year = 2000 + parseInt(ddmmyy[3], 10);
-                dateObj = new Date(year, ddmmyy[2] - 1, ddmmyy[1]);
+                // Handle 2-digit year
+                if (p3 < 100) p3 += 2000;
+
+                // Heuristic: The event is in December.
+                // If p1 is 12 and p2 is valid day -> MM-DD-YYYY (Dec p2)
+                // If p2 is 12 and p1 is valid day -> DD-MM-YYYY (Dec p1)
+
+                if (p1 === 12 && p2 <= 31) {
+                    // Assume MM-DD-YYYY (December)
+                    dateObj = new Date(p3, p1 - 1, p2);
+                } else if (p2 === 12 && p1 <= 31) {
+                    // Assume DD-MM-YYYY (December)
+                    dateObj = new Date(p3, p2 - 1, p1);
+                } else {
+                    // Default to DD-MM-YYYY if neither is explicitly December 
+                    // or if both are 12 (12th Dec) which works either way
+                    dateObj = new Date(p3, p2 - 1, p1);
+                }
             } else {
                 // Fallback to default parser
                 dateObj = new Date(dateStr);
